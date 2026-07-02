@@ -1,0 +1,14 @@
+# /etc/rsyslog.d/99-remote-client.conf
+# Managed by Ansible - Forwards logs to the Central Syslog Server
+
+# Set up local queuing so logs aren't lost if the connection drops
+$ActionQueueType LinkedList
+$ActionQueueFileName srvrfwd
+$ActionResumeRetryCount -1
+$ActionQueueSaveOnShutdown on
+
+{% if rsyslog_protocol == 'udp' %}
+*.* @{{ rsyslog_server_ip }}:{{ rsyslog_port }}
+{% else %}
+*.* @@{{ rsyslog_server_ip }}:{{ rsyslog_port }}
+{% endif %}

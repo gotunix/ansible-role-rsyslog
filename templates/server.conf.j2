@@ -1,0 +1,23 @@
+# /etc/rsyslog.d/00-remote-server.conf
+# Managed by Ansible - Centralized Syslog Receiver
+
+{% if rsyslog_protocol == 'udp' or rsyslog_protocol == 'both' %}
+module(load="imudp")
+input(type="imudp" port="{{ rsyslog_port }}")
+{% endif %}
+
+{% if rsyslog_protocol == 'tcp' or rsyslog_protocol == 'both' %}
+module(load="imtcp")
+input(type="imtcp" port="{{ rsyslog_port }}")
+{% endif %}
+
+# Define a template to dynamically store logs by hostname and program name
+$template RemoteLogs,"/var/log/server/%HOSTNAME%/%PROGRAMNAME%.log"
+
+# If the log is coming from a remote host (not localhost),
+# route it to the RemoteLogs template and stop processing it
+# to prevent it from cluttering local `/var/log/syslog` files
+if ($fromhost-ip != '127.0.0.1' and $fromhost-ip != '::1') then {
+    *.* ?RemoteLogs
+    stop
+}

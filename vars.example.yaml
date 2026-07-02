@@ -1,0 +1,14 @@
+---
+# Configuration for the Central Rsyslog Server
+# Deploy this to your central aggregation node
+#
+# rsyslog_mode: "server"
+# rsyslog_protocol: "udp"   # Make sure your firewall allows UDP port 514 inward
+
+
+# Configuration for a Forwarding Rsyslog Client
+# Deploy this to all other nodes
+#
+# rsyslog_mode: "client"
+# rsyslog_server_ip: "10.0.0.5" # The IP address of the server configured above
+# rsyslog_protocol: "udp"

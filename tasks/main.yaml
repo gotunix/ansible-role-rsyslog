@@ -1,0 +1,55 @@
+---
+- name: Ensure rsyslog is installed
+  ansible.builtin.package:
+    name: rsyslog
+    state: present
+
+- name: Create base directory for remote logs (server mode)
+  ansible.builtin.file:
+    path: /var/log/server
+    state: directory
+    owner: syslog
+    group: adm
+    mode: '0755'
+  when: rsyslog_mode == "server"
+  failed_when: false
+
+- name: Configure rsyslog as a Centralized Server
+  ansible.builtin.template:
+    src: server.conf.j2
+    dest: /etc/rsyslog.d/00-remote-server.conf
+    owner: root
+    group: root
+    mode: '0644'
+  when: rsyslog_mode == "server"
+  notify: Restart rsyslog
+
+- name: Remove specific client configurations if acting as server
+  ansible.builtin.file:
+    path: /etc/rsyslog.d/99-remote-client.conf
+    state: absent
+  when: rsyslog_mode == "server"
+  notify: Restart rsyslog
+
+- name: Configure rsyslog as a Forwarding Client
+  ansible.builtin.template:
+    src: client.conf.j2
+    dest: /etc/rsyslog.d/99-remote-client.conf
+    owner: root
+    group: root
+    mode: '0644'
+  when: rsyslog_mode == "client" and rsyslog_server_ip != ""
+  notify: Restart rsyslog
+
+- name: Remove specific server configurations if acting as client
+  ansible.builtin.file:
+    path: /etc/rsyslog.d/00-remote-server.conf
+    state: absent
+  when: rsyslog_mode == "client"
+  notify: Restart rsyslog
+
+- name: Ensure rsyslog daemon is enabled and started
+  ansible.builtin.service:
+    name: rsyslog
+    state: started
+    enabled: true

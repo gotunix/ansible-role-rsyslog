@@ -1,0 +1,5 @@
+---
+rsyslog_mode: "client"        # Set to 'server' to configure as a central log receiver
+rsyslog_server_ip: "127.0.0.1" # The IP address of your central rsyslog server
+rsyslog_port: 514             # The port to send/receive logs
+rsyslog_protocol: "udp"       # Set to 'udp', 'tcp', or 'both' (both only valid for server)
